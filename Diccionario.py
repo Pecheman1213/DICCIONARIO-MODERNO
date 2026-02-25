@@ -1,17 +1,23 @@
-meme_dict = {
-            "CRINGE": "Algo excepcionalmente raro o embarazoso",
-            "LOL": "Una respuesta común a algo gracioso",
-            "ROFL": "una respuesta a una broma",
-            "SHEESH": "ligera desaprobación",
-            "CREEPY": "aterrador, siniestro",
-            "AGGRO":  "ponerse agresivo/enojado"
-            }
+import discord
+from bot_logic import flip_coin 
+from discord.ext import commands
+
+# Prefijo del bot
+intents = discord.Intents.default()
+intents.message_content = True
+ 
+bot = commands.Bot(command_prefix="!p ", intents=intents)
+
+@bot.command(name = "saludar")
+async def saludar(ctx):
+    await ctx.send("Hola")
 
 
-word = input("Escribe una palabra que no entiendas (¡con mayúsculas!): ")
+@bot.command()
+async def repeat(ctx, times: int, content='repeating...'):
+    """Repeats a message multiple times."""
+    for i in range(times):
+        await ctx.send(content)
 
 
-if word in meme_dict.keys():
-    print(meme_dict[word])
-else:
-    print("Esa palabra no la sé xdddd")
+bot.run(")
