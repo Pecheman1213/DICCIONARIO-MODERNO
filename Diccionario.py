@@ -1,10 +1,15 @@
 import discord
 from bot_logic import flip_coin 
 from bot_logic import get_duck_image_url
+from bot_logic import get_partidos
+from bot_logic import get_tabla
 from discord.ext import commands
 import yt_dlp as youtube_dl
 import asyncio
 import random
+
+
+API_KEY = "c15cbde00ae5492898f29c7197cd8beb"
 
 # Prefijo del bot
 intents = discord.Intents.default()
@@ -12,6 +17,7 @@ intents.message_content = True
 intents.members = True
  
 bot = commands.Bot(command_prefix="!p ", intents=intents)
+
 
 
 @bot.event
@@ -127,6 +133,76 @@ async def duck(ctx):
     image_url = get_duck_image_url()
 
     await ctx.send(image_url)
+
+@bot.command()
+async def partidos(ctx, liga="PL"):
+    lista = get_partidos(liga)
+    if not lista:
+        await ctx.send("No hay partidos!")
+        return
+    
+    mensaje = f"**Partidos de {liga}:**\n"
+    for p in lista[:5]:
+        local = p['homeTeam']['name']
+        visita = p['awayTeam']['name']
+        hora = p['utcDate'][11:16]
+        marcador = f"{p['score']['fullTime']['home']} - {p['score']['fullTime']['away']}"
+        mensaje += f"⚽ {local} {marcador} {visita} - {hora} UTC\n"
+    
+    await ctx.send(mensaje)
+
+
+@bot.command()
+async def tabla(ctx, liga="PL"):
+    standings = get_tabla(liga)
+    if not standings:
+        await ctx.send("No encontré la tabla!")
+        return
+    
+    mensaje = f"**Tabla de {liga}:**\n"
+    for equipo in standings[:10]:
+        pos = equipo['position']
+        nombre = equipo['team']['name']
+        pts = equipo['points']
+        mensaje += f"{pos}. {nombre} - {pts} pts\n"
+    
+    await ctx.send(mensaje)
+
+@bot.command()
+async def ayuda(ctx):
+    mensaje = """**Ligas disponibles:**
+🏴󠁧󠁢󠁥󠁮󠁧󠁿 `PL` — Premier League
+🇪🇸 `PD` — La Liga
+🇮🇹 `SA` — Serie A
+🇩🇪 `BL1` — Bundesliga
+🇫🇷 `FL1` — Ligue 1
+🇪🇺 `CL` — Champions League
+🇪🇺 `EL` — Europa League
+🇪🇺 `EC` — Eurocopa
+🌍 `WC` — Mundial
+🇧🇷 `BSA` — Serie A Brasil
+🇵🇹 `PPL` — Primeira Liga
+🇳🇱 `DED` — Eredivisie
+
+**Comandos:**
+`!p partidos [liga]` — partidos de hoy
+`!p tabla [liga]` — tabla de posiciones
+`!p prediccion [equipo1] [equipo2]` — predice el resultado de un partido"""
+    await ctx.send(mensaje)
+
+@bot.command()
+async def prediccion(ctx, equipo1, equipo2):
+    goles1 = random.randint(0, 5)
+    goles2 = random.randint(0, 5)
+    
+    if goles1 > goles2:
+        resultado = f"🏆 Gana {equipo1}!"
+    elif goles2 > goles1:
+        resultado = f"🏆 Gana {equipo2}!"
+    else:
+        resultado = "🤝 Empate!"
+    
+    await ctx.send(f"**Predicción:**\n⚽ {equipo1} {goles1} - {goles2} {equipo2}\n{resultado}")
 
 
 bot.run(")
