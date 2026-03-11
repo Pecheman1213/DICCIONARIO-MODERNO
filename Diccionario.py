@@ -1,14 +1,23 @@
 import discord
 from bot_logic import flip_coin 
+from bot_logic import get_duck_image_url
 from discord.ext import commands
 import yt_dlp as youtube_dl
 import asyncio
+import random
 
 # Prefijo del bot
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
  
 bot = commands.Bot(command_prefix="!p ", intents=intents)
+
+
+@bot.event
+async def on_ready():
+
+    print(f"Bot conectado como {bot.user}")
 
 
 ytdl_format_options = {
@@ -96,6 +105,28 @@ async def BASTA(ctx):
         await ctx.send("no estas en ningun canal de voz hermanito")
         return
     await ctx.voice_client.disconnect()
+
+
+@bot.command()
+async def panchito(ctx):
+    imagenes = ['images/panchulo.jpeg', 'images/panchulo2.png', 'images/panchulo3.png']
+    imagen = random.choice(imagenes)
+    with open(imagen, 'rb') as f:
+        picture = discord.File(f)
+    await ctx.send(file=picture)
+
+
+@bot.command('duck')
+
+async def duck(ctx):
+
+    '''Una vez que llamamos al comando duck, 
+
+    el programa llama a la función get_duck_image_url'''
+
+    image_url = get_duck_image_url()
+
+    await ctx.send(image_url)
 
 
 bot.run(")
